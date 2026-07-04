@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: innovatech-frontend
+  ECR_REPOSITORY: front-despacho
 
 jobs:
   build-and-push:
