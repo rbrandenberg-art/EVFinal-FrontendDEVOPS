@@ -3,12 +3,15 @@ import axios from "axios";
 import { Modal } from "./Modal";
 import { FormCierreDespacho } from "./FormCierreDespacho";
 
+const API_VENTAS = import.meta.env.VITE_API_VENTAS;
+const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
+
 export const TableDespachos = () => {
   const [despachos, setDespachos] = useState([]);
 
   const despacho = async () => {
     await axios
-      .get("http://localhost:8080/api/v1/despachos", {
+      .get(API_DESPACHOS, {
         headers:{
               'Content-Type': 'application/json',
               'Accept': 'application/json'

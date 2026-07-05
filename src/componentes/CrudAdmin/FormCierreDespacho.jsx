@@ -2,6 +2,9 @@ import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import axios from "axios";
 
+const API_VENTAS = import.meta.env.VITE_API_VENTAS;
+const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
+
 export const FormCierreDespacho = ({ despacho, onClose }) => {
   const { register, handleSubmit } = useForm();
 
@@ -16,7 +19,7 @@ export const FormCierreDespacho = ({ despacho, onClose }) => {
 
     try {
       await axios.put(
-        `http://localhost:8080/api/v1/despachos/${despacho.idDespacho}`,
+        `${API_DESPACHOS}/${despacho.idDespacho}`,
         jsonData,
         {
           headers:{
