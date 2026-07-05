@@ -4,7 +4,7 @@ import axios from "axios";
 
 // Nota para tu proyecto real: Usa import.meta.env.VITE_API_DESPACHOS
 // Aquí usamos una cadena de texto temporal para asegurar la compilación en este entorno.
-const API_DESPACHOS = "http://localhost:8081/api/v1/despachos";
+const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
 
 export const FormCierreDespacho = ({ despacho, onClose }) => {
   const { register, handleSubmit } = useForm();

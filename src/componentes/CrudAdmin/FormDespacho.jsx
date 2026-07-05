@@ -4,8 +4,8 @@ import axios from "axios";
 
 // Nota para tu proyecto real: Usa import.meta.env.VITE_API_VENTAS
 // Aquí usamos cadenas de texto temporales para asegurar la compilación en este entorno.
-const API_VENTAS = "http://localhost:8080/api/v1/ventas";
-const API_DESPACHOS = "http://localhost:8081/api/v1/despachos";
+const API_VENTAS = import.meta.env.VITE_API_VENTAS;
+const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
 
 // Mantenemos la exportación nombrada para que no se rompan tus otros componentes (como TableCompras)
 export const FormDespacho = ({ venta, onClose }) => {
