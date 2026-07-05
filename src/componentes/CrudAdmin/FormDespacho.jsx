@@ -2,17 +2,17 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import axios from "axios";
 
-// 1. Centralizamos las URLs.
-const API_VENTAS = import.meta.env.VITE_API_VENTAS;
-const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
+// Nota para tu proyecto real: Usa import.meta.env.VITE_API_VENTAS
+// Aquí usamos cadenas de texto temporales para asegurar la compilación en este entorno.
+const API_VENTAS = "http://localhost:8080/api/v1/ventas";
+const API_DESPACHOS = "http://localhost:8081/api/v1/despachos";
 
-// Para el entorno de visualización, nombramos el componente principal como App 
-// y lo exportamos por defecto.
-export default function App({ venta, onClose }) {
+// Mantenemos la exportación nombrada para que no se rompan tus otros componentes (como TableCompras)
+export const FormDespacho = ({ venta, onClose }) => {
   const { register, handleSubmit } = useForm();
   const [mensaje, setMensaje] = useState(null);
 
-  // Valores por defecto por si el componente se renderiza sin la prop 'venta'
+  // Valores por defecto para evitar fallos si se renderiza de forma aislada
   const datosVenta = venta || {
     idVenta: "N/A",
     direccionCompra: "Dirección de prueba",
@@ -35,17 +35,19 @@ export default function App({ venta, onClose }) {
     };
 
     try {
-      // 2. Usamos la variable en lugar de la URL quemada
       if (datosVenta.idVenta !== "N/A") {
-          await axios.put(`${API_VENTAS}/${datosVenta.idVenta}`, jsonDataSales, {
+        await axios.put(
+          `${API_VENTAS}/${datosVenta.idVenta}`,
+          jsonDataSales,
+          {
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json'
             }
-          });
+          }
+        );
       }
       
-      // 3. Usamos la variable para despachos
       await axios.post(API_DESPACHOS, jsonData, {
         headers: {
           'Content-Type': 'application/json',
@@ -53,10 +55,18 @@ export default function App({ venta, onClose }) {
         }
       });
       
-      setMensaje({ titulo: "Despacho registrado 🛻!", texto: "El despacho ha sido generado con éxito en la base de datos", tipo: "success" });
+      setMensaje({ 
+        tipo: 'success', 
+        titulo: 'Despacho registrado 🛻!', 
+        texto: 'El despacho ha sido generado con éxito en la base de datos' 
+      });
     } catch (error) {
       console.error("Error en la solicitud:", error);
-      setMensaje({ titulo: "Error", texto: "Hubo un problema de conexión con el servidor.", tipo: "error" });
+      setMensaje({ 
+        tipo: 'error', 
+        titulo: 'Error', 
+        texto: 'Hubo un problema de conexión con el servidor.' 
+      });
     }
   };
 
@@ -65,12 +75,23 @@ export default function App({ venta, onClose }) {
       {mensaje && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm">
-            <h3 className={`text-2xl font-bold mb-4 ${mensaje.tipo === 'error' ? 'text-red-600' : 'text-green-600'}`}>{mensaje.titulo}</h3>
+            <h3 className={`text-2xl font-bold mb-4 ${mensaje.tipo === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+              {mensaje.titulo}
+            </h3>
             <p className="mb-6">{mensaje.texto}</p>
-            <button onClick={() => { setMensaje(null); if(mensaje.tipo === 'success' && onClose) onClose(); }} className="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold">Aceptar</button>
+            <button 
+              onClick={() => { 
+                setMensaje(null); 
+                if(mensaje.tipo === 'success' && onClose) onClose(); 
+              }} 
+              className="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold"
+            >
+              Aceptar
+            </button>
           </div>
         </div>
       )}
+      
       <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md">
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -139,4 +160,7 @@ export default function App({ venta, onClose }) {
       </div>
     </div>
   );
-}
+};
+
+// Exportamos también por defecto para habilitar la previsualización aislada en este entorno
+export default FormDespacho;
