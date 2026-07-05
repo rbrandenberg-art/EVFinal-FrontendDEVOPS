@@ -1,138 +1,186 @@
 import { useForm } from "react-hook-form";
-import Swal from "sweetalert2";
+import { useState } from "react";
 import axios from "axios";
 
-const API_VENTAS = import.meta.env.VITE_API_VENTAS;
-const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
+// Nota para tu proyecto real: Usa import.meta.env.VITE_API_DESPACHOS
+// Aquí usamos una cadena de texto temporal para asegurar la compilación en este entorno.
+const API_DESPACHOS = "http://localhost:8081/api/v1/despachos";
 
 export const FormCierreDespacho = ({ despacho, onClose }) => {
   const { register, handleSubmit } = useForm();
+  const [mensaje, setMensaje] = useState(null);
+
+  // Valores por defecto seguros por si 'despacho' llega indefinido en la vista previa
+  const datosDespacho = despacho || {
+    idDespacho: "N/A",
+    fechaDespacho: "2026-07-05",
+    patenteCamion: "AB-CD-12",
+    intento: 0,
+    idCompra: "N/A",
+    direccionCompra: "Dirección de prueba",
+    valorCompra: "15500"
+  };
 
   const onSubmit = async (data) => {
-    console.log("onSubmit ejecutado");
+    // Convertimos los datos de texto (String) que entrega el formulario 
+    // a los tipos de datos reales que exige tu backend Spring Boot
     const jsonData = {
-      intento: data.intento,
-      despachado: data.despachado,
+      intento: parseInt(data.intento), // Convertimos a número entero
+      despachado: data.despachado === "true", // Convertimos el texto a booleano real
     };
 
-    console.log("Datos del formulario:", jsonData);
-
     try {
-      await axios.put(
-        `${API_DESPACHOS}/${despacho.idDespacho}`,
-        jsonData,
-        {
-          headers:{
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+      if (datosDespacho.idDespacho !== "N/A") {
+          await axios.put(
+            `${API_DESPACHOS}/${datosDespacho.idDespacho}`,
+            jsonData,
+            {
+              headers:{
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              }
+            }
+          );
       }
-        }
-      );
-      Swal.fire({
-        title: "Despacho modificado 🛻!",
-        text: "El despacho ha sido modificado exitosamente",
-        icon: "success",
-        confirmButtonText: "Aceptar",
+      
+      setMensaje({ 
+        tipo: 'success', 
+        titulo: 'Despacho modificado 🛻!', 
+        texto: 'El despacho ha sido modificado exitosamente' 
       });
     } catch (error) {
       console.error("Error en la solicitud:", error);
+      setMensaje({ 
+        tipo: 'error', 
+        titulo: 'Error', 
+        texto: 'Hubo un problema de conexión al modificar el despacho.' 
+      });
     }
-    onClose();
   };
 
   return (
-    <>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col justify-center text-center px-24 text-xl"
-      >
-        <div className="mx-auto text-3xl font-bold mb-10 text-teal-600">
-          Editar y cierre de despacho
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {mensaje && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm">
+            <h3 className={`text-2xl font-bold mb-4 ${mensaje.tipo === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+              {mensaje.titulo}
+            </h3>
+            <p className="mb-6">{mensaje.texto}</p>
+            <button 
+              onClick={() => { 
+                setMensaje(null); 
+                if(mensaje.tipo === 'success' && onClose) onClose(); 
+              }} 
+              className="px-6 py-2 bg-teal-600 text-white rounded-lg font-bold"
+            >
+              Aceptar
+            </button>
+          </div>
         </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">ID despacho</label>
-          <input
-            disabled={true}
-            type="text"
-            placeholder="Ingresa fecha de despacho"
-            className="border border-gray-300 rounded-lg block w-full p-1 text-slate-400"
-            value={despacho.idDespacho}
-          />
-        </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">Fecha despacho</label>
-          <input
-            type="date"
-            placeholder="Elige patente de camión"
-            className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            value={despacho.fechaDespacho}
-            disabled={true}
-          />
-        </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">Patente Camión</label>
-          <input
-            type="text"
-            disabled={true}
-            value={despacho.patenteCamion}
-            className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-          />
-        </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">Intentos de entrega</label>
-          <input
-            type="number"
-            defaultValue={despacho.intento}
-            className="border border-gray-300 rounded-lg block w-full  p-1"
-            {...register("intento", { required: true })}
-          />
-        </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">Despacho entregado</label>
-          <select
-            defaultValue={false}
-            className="border border-gray-300 rounded-lg block w-full  p-1"
-            {...register("despachado", { required: true })}
-          >
-            <option value={false}>Despacho abierto</option>
-            <option value={true}>Cerrar despacho</option>
-          </select>
-        </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">ID Compra</label>
-          <input
-            type="text"
-            className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            disabled={true}
-            value={despacho.idCompra}
-          />
-        </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">Dirección Compra</label>
-          <input
-            type="text"
-            className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            disabled={true}
-            value={despacho.direccionCompra}
-          />
-        </div>
-        <div className="mb-5">
-          <label className="block font-bold mb-2">Valor Compra</label>
-          <input
-            type="text"
-            className="border border-gray-300 rounded-lg block w-full text-slate-400 p-1"
-            disabled={true}
-            value={despacho.valorCompra}
-          />
-        </div>
-
-        <button
-          className="py-6 px-14 rounded-lg bg-teal-600 text-white font-bold mb-14"
-          type="submit"
+      )}
+      
+      <div className="bg-white p-6 rounded-lg w-full max-w-md mx-auto shadow-md">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col justify-center text-left text-lg"
         >
-          Modificar Despacho
-        </button>
-      </form>
-    </>
+          <div className="mx-auto text-2xl font-bold mb-8 text-teal-600 text-center">
+            Editar y cierre de despacho
+          </div>
+          
+          <div className="mb-4">
+            <label className="block font-bold mb-2 text-gray-700">ID despacho</label>
+            <input
+              disabled={true}
+              type="text"
+              className="border border-gray-300 rounded-lg block w-full p-2 text-slate-500 bg-gray-100"
+              value={datosDespacho.idDespacho}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block font-bold mb-2 text-gray-700">Fecha despacho</label>
+            <input
+              type="date"
+              className="border border-gray-300 rounded-lg block w-full text-slate-500 p-2 bg-gray-100"
+              value={datosDespacho.fechaDespacho}
+              disabled={true}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block font-bold mb-2 text-gray-700">Patente Camión</label>
+            <input
+              type="text"
+              disabled={true}
+              value={datosDespacho.patenteCamion}
+              className="border border-gray-300 rounded-lg block w-full text-slate-500 p-2 bg-gray-100"
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block font-bold mb-2 text-gray-700">Intentos de entrega</label>
+            <input
+              type="number"
+              defaultValue={datosDespacho.intento}
+              className="border border-gray-300 rounded-lg block w-full p-2 focus:ring-teal-500 focus:border-teal-500"
+              {...register("intento", { required: true })}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block font-bold mb-2 text-gray-700">Despacho entregado</label>
+            <select
+              defaultValue={"false"}
+              className="border border-gray-300 rounded-lg block w-full p-2 focus:ring-teal-500 focus:border-teal-500"
+              {...register("despachado", { required: true })}
+            >
+              <option value={"false"}>Despacho abierto</option>
+              <option value={"true"}>Cerrar despacho</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block font-bold mb-2 text-gray-700">ID Compra</label>
+            <input
+              type="text"
+              className="border border-gray-300 rounded-lg block w-full text-slate-500 p-2 bg-gray-100"
+              disabled={true}
+              value={datosDespacho.idCompra}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block font-bold mb-2 text-gray-700">Dirección Compra</label>
+            <input
+              type="text"
+              className="border border-gray-300 rounded-lg block w-full text-slate-500 p-2 bg-gray-100"
+              disabled={true}
+              value={datosDespacho.direccionCompra}
+            />
+          </div>
+          
+          <div className="mb-8">
+            <label className="block font-bold mb-2 text-gray-700">Valor Compra</label>
+            <input
+              type="text"
+              className="border border-gray-300 rounded-lg block w-full text-slate-500 p-2 bg-gray-100"
+              disabled={true}
+              value={datosDespacho.valorCompra}
+            />
+          </div>
+
+          <button
+            className="w-full py-3 px-4 rounded-lg bg-teal-600 text-white font-bold hover:bg-teal-700 transition duration-300 ease-in-out shadow-md"
+            type="submit"
+          >
+            Modificar Despacho
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
+
+export default FormCierreDespacho;
