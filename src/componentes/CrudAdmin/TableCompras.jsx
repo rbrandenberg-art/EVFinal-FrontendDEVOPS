@@ -4,7 +4,6 @@ import { FormDespacho } from "./FormDespacho";
 import axios from "axios";
 
 const API_VENTAS = import.meta.env.VITE_API_VENTAS;
-const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
 
 export const TableCompras = () => {
   const [ventas, setVentas] = useState([]);

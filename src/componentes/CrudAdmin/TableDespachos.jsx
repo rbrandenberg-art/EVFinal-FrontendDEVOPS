@@ -3,7 +3,6 @@ import axios from "axios";
 import { Modal } from "./Modal";
 import { FormCierreDespacho } from "./FormCierreDespacho";
 
-const API_VENTAS = import.meta.env.VITE_API_VENTAS;
 const API_DESPACHOS = import.meta.env.VITE_API_DESPACHOS;
 
 export const TableDespachos = () => {
